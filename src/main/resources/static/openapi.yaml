@@ -1,0 +1,270 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v1
+servers:
+  - url: http://localhost:8080
+    description: Local server URL
+paths:
+  /api/products/{id}:
+    get:
+      tags:
+        - Products
+      operationId: get
+      description: Finds product with the given ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product ID
+          example: 1
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: NOT FOUND
+  /api/products:
+    get:
+      tags:
+        - Products
+      operationId: list
+      description: Finds all products
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      tags:
+        - Products
+      operationId: create
+      description: Creates product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: BAD REQUEST
+  /api/products/{id}/price:
+    put:
+      tags:
+        - Products
+      operationId: setPrice
+      description: Change product price with the given ID
+      parameters:
+        - name: id
+          in: path
+          description: Product ID
+          example: 1
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: BAD REQUEST
+        '404':
+          description: NOT FOUND
+  /api/orders:
+    get:
+      tags:
+        - Orders
+      operationId: list_1
+      description: Finds orders in the given time period
+      parameters:
+        - name: from
+          in: query
+          description: From date of order search
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: "2021-10-12 11:53:19"
+        - name: to
+          in: query
+          required: true
+          description: To date of order search
+          schema:
+            type: string
+            format: date-time
+            example: "2021-10-13 11:53:19"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '400':
+          description: BAD REQUEST
+    post:
+      tags:
+        - Orders
+      operationId: create_1
+      description: Creates order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderDto'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          description: BAD REQUEST
+        '404':
+          description: NOT FOUND
+components:
+  schemas:
+    PriceDto:
+      type: object
+      properties:
+        priceInUsd:
+          description: Price in USD
+          example: 213.22
+          minimum: 0.01
+          exclusiveMinimum: false
+          type: number
+          format: double
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of product
+          example: 1
+        name:
+          type: string
+          description: Name of product
+          example: A lovely Lada Niva
+        priceInUsd:
+          type: number
+          format: double
+          description: Price in USD
+          example: 213.22
+    ProductDto:
+      required:
+        - name
+      type: object
+      properties:
+        priceInUsd:
+          description: Price in USD
+          example: 213.22
+          minimum: 0.01
+          exclusiveMinimum: false
+          type: number
+          format: double
+        name:
+          type: string
+          description: Name of product
+          example: A lovely Lada Niva
+    OrderDto:
+      required:
+        - buyerEmail
+        - items
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemDto'
+        buyerEmail:
+          type: string
+          description: A valid email address of the buyer
+          example: example@exapmle.com
+    OrderItemDto:
+      required:
+        - productId
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+          description: ID of product
+          example: 1
+        quantity:
+          minimum: 1
+          type: integer
+          format: int32
+          description: Quantity ordered from product
+          example: 15
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of order
+          example: 1
+        calculatedPriceInUsd:
+          type: number
+          format: double
+          description: Total USD cost of the products at the moment of purchase
+          example: 15000
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        buyerEmail:
+          type: string
+          description: A valid email address of the buyer
+          example: example@exapmle.com
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of purchase
+          example: "2021-10-12 11:53:19"
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID of order item
+          example: 1
+        product:
+          $ref: '#/components/schemas/Product'
+        quantity:
+          type: integer
+          format: int32
+          description: Quantity of the purchased product

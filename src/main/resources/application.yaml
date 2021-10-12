@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/shop
+    username: test_db_user
+    password: password
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: public
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    generate-ddl: true
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+log4j:
+  category:
+    org:
+      springframework: WARN
+springdoc:
+  swagger-ui:
+    path: api
+    operationsSorter: method
+    url: /openapi.yaml
